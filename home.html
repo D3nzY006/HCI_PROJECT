@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- CRUCIAL FOR RESPONSIVENESS: Tells browsers to match the screen's width and scale correctly -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive E-commerce Prototype</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind Config for brand colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'gcash': '#0079c2', // Official Gcash Blue
+                        'maya': '#8b5cf6', // Violet/Purple for Maya
+                        'cod': '#10b981',  // Emerald Green for COD
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f8ff; /* Very light blue background for a refreshing feel */
+        }
+        /* Define a consistent primary color (Teal) */
+        .color-primary { background-color: #14b8a6; } /* Teal 500 */
+        .color-primary-hover { background-color: #0d9488; } /* Teal 600 */
+        .text-primary { color: #14b8a6; }
+
+        .header-shadow {
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08); /* Stronger shadow for definition */
+        }
+        /* Custom dark button style matching wireframes, now using primary color */
+        .btn-primary-dark {
+            background-color: #14b8a6;
+            color: white;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-primary-dark:hover {
+            background-color: #0d9488;
+            transform: translateY(-1px);
+        }
+        /* Custom light button/input style matching wireframes */
+        .btn-secondary-light, .input-field {
+            background-color: #e2e8f0; /* Light Slate */
+            color: #333;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary-light:hover {
+            background-color: #cbd5e1;
+        }
+        .app-container {
+             /* Increased padding/rounded corners for desktop view */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- CUSTOM SCROLLBAR STYLES --- */
+        .app-container ::-webkit-scrollbar {
+            width: 6px; 
+            height: 6px; 
+        }
+        .app-container ::-webkit-scrollbar-track {
+            background: #e5e7eb; 
+            border-radius: 10px;
+        }
+        .app-container ::-webkit-scrollbar-thumb {
+            background: #b2f5ea; 
+            border-radius: 10px;
+        }
+        .app-container ::-webkit-scrollbar-thumb:hover {
+            background: #81e6d9; 
+        }
+        /* --- END CUSTOM SCROLLBAR STYLES --- */
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+
+    <!-- Main Application Container: 
+         w-full on mobile, constrained to max-w-md (approx 512px) on desktop/tablet 
+         to simulate a focused, app-like view. 
+         Uses flex-col to stack header and scrollable content. -->
+    <div id="app" class="w-full max-w-md bg-white min-h-screen md:min-h-[700px] md:rounded-2xl app-container flex flex-col">
+        <!-- Content will be injected here by JavaScript -->
+    </div>
+
+    <!-- JavaScript for Navigation and Rendering -->
+    <script>
+        // Global state management
+        let currentPage = 'login';
+        let history = []; // To manage the back navigation stack
+        let cartItems = []; // Array of { id, name, price, imageUrl, quantity }
+        
+        // State for orders, messages, and payment
+        let mockOrders = []; // Stores placed orders: { id, items: [cartItem], total, date, status }
+        let mockMessages = []; // Stores confirmation messages: { id, subject, content, date, read }
+        let lastOrderId = 0; // Simple counter for unique ID
+        let selectedPaymentMethod = 'cod'; // State for selected payment method
+        
+        // State for filtering and searching
+        let activeCategory = 'All';
+        let searchQuery = '';
+        
+        // Global variable to track cursor position before re-render
+        let cursorPosition = null; 
+        
+        // Master list of products with their categories and details
+        const allProducts = [
+            // Best Sellers / Dessert (Uses uploaded file)
+            { id: 'P1', name: "Sweet Banana Treat", price: 250.00, 
+              imageUrl: "uploaded:minatamis-na-saba-philippine-bananas-in-syrup.jpg-2b6de75a-a422-4ed6-94b4-43927b7a846f", 
+              category: 'Dessert', description: "A delicious, creamy dessert with fresh banana, caramel, and vanilla ice cream." },
+            
+            // Best Sellers / Main Course (Themed Placeholder)
+            { id: 'P2', name: "Savory Steak", price: 499.50, 
+              imageUrl: "https://placehold.co/150x120/a34438/ffffff?text=🥩+Steak", 
+              category: 'Main Course', description: "Grilled USDA choice cut steak, served with asparagus and roasted garlic potatoes." },
+            
+            // Main Course (Themed Placeholders)
+            { id: 'P3', name: "Spicy Noodle Soup", price: 180.00, 
+              imageUrl: "https://placehold.co/150x120/dd782e/ffffff?text=🍜+Noodles", 
+              category: 'Main Course', description: "Rich, fiery broth filled with hand-pulled noodles, pork, and bok choy." },
+            { id: 'P7', name: "Grilled Fish Fillet", price: 320.00, 
+              imageUrl: "https://placehold.co/150x120/007f9c/ffffff?text=🐟+Grilled+Fish", 
+              category: 'Main Course', description: "Lemon-herb grilled snapper fillet, light and healthy, served with rice pilaf." },
+            
+            // Appetizer (Themed Placeholders)
+            { id: 'P4', name: "Fresh Garden Salad", price: 120.00, 
+              imageUrl: "https://placehold.co/150x120/4a7f45/ffffff?text=🥗+Salad", 
+              category: 'Appetizer', description: "Crisp mixed greens, tomatoes, cucumbers, and a light vinaigrette dressing." },
+            { id: 'P9', name: "Mozzarella Sticks", price: 150.00, 
+              imageUrl: "https://placehold.co/150x120/f9d747/000000?text=🧀+Sticks", 
+              category: 'Appetizer', description: "Golden fried mozzarella with a side of zesty marinara sauce." },
+            { id: 'P10', name: "Buffalo Chicken Wings", price: 175.00, 
+              imageUrl: "https://placehold.co/150x120/cc3000/ffffff?text=🍗+Wings", 
+              category: 'Appetizer', description: "Tangy and spicy chicken wings, perfect for sharing (or not!)." },
+            
+            // Beverage (Themed Placeholders)
+            { id: 'P5', name: "Iced Caramel Coffee", price: 100.00, 
+              imageUrl: "https://placehold.co/150x120/7e573e/ffffff?text=☕+Iced+Coffee", 
+              category: 'Beverage', description: "A chilled coffee beverage layered with sweet caramel syrup." },
+            { id: 'P8', name: "Tropical Mango Smoothie", price: 135.00, 
+              imageUrl: "https://placehold.co/150x120/ffb800/ffffff?text=🥭+Smoothie", 
+              category: 'Beverage', description: "Blended fresh mango, yogurt, and a splash of coconut milk. Refreshing!" },
+            { id: 'P11', name: "Green Tea Frappe", price: 110.00, 
+              imageUrl: "https://placehold.co/150x120/86c166/ffffff?text=🍵+Matcha", 
+              category: 'Beverage', description: "Cool, icy blend of matcha green tea and cream." },
+
+            // Dessert (Themed Placeholders)
+            { id: 'P6', name: "Chocolate Lava Cake", price: 180.00, 
+              imageUrl: "https://placehold.co/150x120/5e3518/ffffff?text=🍫+Lava+Cake", 
+              category: 'Dessert', description: "Warm, molten chocolate cake with a soft, gooey center. A classic favorite." },
+            { id: 'P12', name: "Classic Cheesecake Bite", price: 90.00, 
+              imageUrl: "https://placehold.co/150x120/f8f4e3/333333?text=🍰+Cheesecake", 
+              category: 'Dessert', description: "Rich and creamy New York-style cheesecake, individually portioned." },
+            
+            // Filipino Items (Themed Placeholders)
+            { id: 'P13', name: "Chicken Adobo", price: 210.00, 
+              imageUrl: "https://placehold.co/150x120/6b7280/ffffff?text=🐔+Adobo", 
+              category: 'Main Course', description: "Classic Filipino dish, marinated in soy sauce, vinegar, and garlic." },
+            { id: 'P14', name: "Pancit Canton", price: 155.00, 
+              imageUrl: "https://placehold.co/150x120/e8c283/333333?text=🥢+Pancit", 
+              category: 'Main Course', description: "Stir-fried noodles with mixed vegetables and choice of meat." },
+            { id: 'P15', name: "Leche Flan", price: 85.00, 
+              imageUrl: "https://placehold.co/150x120/f9a825/333333?text=🍮+Flan", 
+              category: 'Dessert', description: "A creamy custard dessert with a soft caramel layer." },
+            { id: 'P16', name: "Spring Rolls", price: 95.00, 
+              imageUrl: "https://placehold.co/150x120/c23616/ffffff?text=🍤+Rolls", 
+              category: 'Appetizer', description: "Crispy fried rolls filled with vegetables, served with sweet chili sauce." },
+        ];
+
+
+        // --- STATE MANAGEMENT FUNCTIONS ---
+        
+        // Function to handle search input to capture cursor position
+        function handleSearchInput(inputElement) {
+            // 1. Capture and store the current cursor position before re-render
+            cursorPosition = inputElement.selectionStart;
+            
+            // 2. Update the state
+            searchQuery = inputElement.value;
+            
+            // 3. Re-render the app
+            render();
+        }
+
+        // Add product to cart or increment quantity if it exists
+        function addToCart(productData) {
+            const existingItem = cartItems.find(item => item.id === productData.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cartItems.push({ 
+                    id: productData.id,
+                    name: productData.name,
+                    price: productData.price,
+                    // Use the image URL for the cart display
+                    imageUrl: productData.imageUrl, 
+                    quantity: 1 
+                });
+            }
+        }
+
+        // Update quantity of a specific item in the cart
+        function updateItemQuantity(id, delta) {
+            const item = cartItems.find(i => i.id === id);
+            if (item) {
+                item.quantity = Math.max(1, item.quantity + delta);
+            }
+            render(); 
+        }
+
+        // Remove item from cart
+        function removeItemFromCart(id) {
+            cartItems = cartItems.filter(i => i.id !== id);
+            
+            if (cartItems.length === 0) {
+                // If cart is empty, redirect back to home
+                navigate('home');
+            } else {
+                render();
+            }
+        }
+
+        // Calculates the total price for ALL products in the cart
+        function calculateTotal() {
+            return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // Function to handle category selection
+        function setCategoryFilter(category) {
+            activeCategory = category;
+            searchQuery = ''; // Clear search when switching categories for clarity
+            cursorPosition = null; // Clear the cursor position so the search input does not focus.
+            render(); // Re-render the home page with the new filter
+        }
+        
+        // FUNCTION: Update selected payment method
+        function selectPaymentMethod(id) {
+            selectedPaymentMethod = id;
+            render(); // Re-render to update the visual selection
+        }
+        window.selectPaymentMethod = selectPaymentMethod; // Expose globally
+
+        
+        // FUNCTION: Process Order, save to history, and generate message
+        function processOrder() {
+            if (cartItems.length === 0) {
+                navigate('home');
+                return;
+            }
+
+            lastOrderId++;
+            const orderId = `ORD-${new Date().getTime()}-${lastOrderId}`;
+            const timestamp = new Date().toLocaleString();
+            const subtotal = calculateTotal();
+            const deliveryFee = 50.00;
+            const finalTotal = subtotal + deliveryFee;
+            const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+            // 1. Create Order and save to mockOrders
+            const newOrder = {
+                id: orderId,
+                items: JSON.parse(JSON.stringify(cartItems)), // Deep copy items
+                total: finalTotal,
+                date: timestamp,
+                status: 'Confirmed',
+                payment: selectedPaymentMethod // Store the selected payment method
+            };
+            mockOrders.unshift(newOrder); // Add to the start
+
+            // 2. Create Message and save to mockMessages
+            const paymentName = selectedPaymentMethod.toUpperCase();
+            const messageContent = `Your order ${orderId.substring(4, 12)} for ${totalUnits} item(s) totaling ₱${finalTotal.toFixed(2)} using ${paymentName} has been successfully placed. Your order is now being prepared for delivery.`;
+            const newMessage = {
+                id: `MSG-${orderId}`,
+                subject: 'Order Confirmation',
+                content: messageContent, // The message regarding the order
+                date: timestamp,
+                read: false,
+            };
+            mockMessages.unshift(newMessage); // Add to the start
+
+            // 3. Clear Cart
+            cartItems = [];
+
+            // 4. Navigate to success page
+            navigate('submitted');
+        }
+
+
+        // Utility function to change the page
+        function navigate(pageName, data = {}) {
+            
+            // If currently on 'orders' and navigating 'back', reset filters/search for a clean Home view.
+            if (currentPage === 'orders' && pageName === 'back') {
+                activeCategory = 'All';
+                searchQuery = '';
+            }
+            
+            // Clear cursor position if navigating away from home (and not going back)
+            if (currentPage === 'home' && pageName !== 'back') {
+                cursorPosition = null;
+            }
+
+            // Push current page to history if it's not the first page and we're not going back
+            if (currentPage !== pageName && pageName !== 'back') {
+                history.push(currentPage);
+            }
+            
+            if (pageName === 'back') {
+                // *** FIX: Ensure back from Orders/Menu/Help always goes Home if no history ***
+                if (currentPage === 'orders' || currentPage === 'menu' || currentPage === 'help') {
+                    let previousPage = history.pop();
+                    if (previousPage && previousPage !== 'submitted') {
+                        currentPage = previousPage;
+                    } else {
+                        currentPage = 'home';
+                        history = []; // Clear history to prevent issues
+                    }
+                } else {
+                    let previousPage = history.pop();
+                    
+                    // Skip the 'submitted' page in history 
+                    while (previousPage === 'submitted' && history.length > 0) {
+                        previousPage = history.pop();
+                    }
+
+                    if (previousPage) {
+                        currentPage = previousPage;
+                    } else {
+                        currentPage = 'home'; // Default back to home if history is empty
+                    }
+                }
+                // *** END FIX ***
+            } else {
+                currentPage = pageName;
+            }
+
+            // If we land on 'home', clear history to prevent navigating 
+            // back to the login page or a broken state.
+            if (currentPage === 'home') {
+                history = [];
+            }
+            
+            // If navigating to the cart page and product data is provided, add it to the cart
+            if (pageName === 'cart' && data.id) {
+                // Find the full product details from the master list
+                const fullProduct = allProducts.find(p => p.id === data.id);
+                if (fullProduct) {
+                    // Add the product (or increment quantity) and then navigate to cart view
+                    addToCart(fullProduct);
+                }
+            }
+            
+            render(); // Re-render the app
+            console.log(`Mapped to: ${currentPage}. History length: ${history.length}`);
+        }
+
+        // --- ICON SVGs (For clean code and consistent look) ---
+        const Icon = {
+            Back: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
+            Search: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+            Menu: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>`,
+            CheckCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>`,
+            Orders: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5h-2A6 6 0 0 0 3 11v11h18V11a6 6 0 0 0-6-6Z"/><path d="M7 11v-1a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v1"/></svg>`,
+            Message: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9.9 9.9 0 0 0 4 15.1A10 10 0 0 0 15.1 20H16a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v8"/></svg>`,
+            Help: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>`,
+            Email: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+            Phone: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-5.6-5.6C4.4 7.31 5.3 5.46 7.05 4.7l.54-.25a2 2 0 0 1 2.47 1.25l1.6 4a1 1 0 0 1-.37 1.25l-2.4 1.6a15.7 15.7 0 0 0 5.6 5.6l1.6-2.4a1 1 0 0 1 1.25-.37l4 1.6a2 2 0 0 1 1.25 2.47Z"/></svg>`,
+            Profile: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            Settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.22a2 2 0 0 0-2 2.13A1.98 1.98 0 0 0 4.11 9H2a2 2 0 0 0 2 2.22v.44a2 2 0 0 0 2 2.22A1.98 1.98 0 0 0 9 17.89V22a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.22a2 2 0 0 0 2-2.13A1.98 1.98 0 0 0 19.89 15H22a2 2 0 0 0-2-2.22v-.44a2 2 0 0 0-2-2.22A1.98 1.98 0 0 0 15 6.11V2a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`,
+            Logout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+            // Logo: Spoon and Fork inside a Circle SVG
+            Logo: `<svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+                        <!-- Background Circle (Teal) -->
+                        <circle cx="50" cy="50" r="50" fill="#14b8a6"/>
+                        <!-- Spoon (White) -->
+                        <path d="M55 25C55 18.373 51.642 13 47.5 13C43.358 13 40 18.373 40 25V60C40 62.209 41.791 64 44 64H51C53.209 64 55 62.209 55 60V25Z" fill="white" transform="rotate(-15 47.5 47.5)"/>
+                        <!-- Fork (White) -->
+                        <path d="M60 25V60C60 62.209 61.791 64 64 64H71C73.209 64 75 62.209 75 60V25C75 22.791 73.209 21 71 21H64C61.791 21 60 22.791 60 25ZM63 25C63 24.448 63.448 24 64 24H71C71.552 24 72 24.448 72 25V30H63V25Z" fill="white" transform="rotate(15 67.5 47.5)"/>
+                        <path d="M63 35H72V58H63V35Z" fill="white" transform="rotate(15 67.5 47.5)"/>
+                        <!-- Handle (simplified for visual balance) -->
+                        <rect x="44" y="64" width="27" height="23" rx="3" fill="white" transform="rotate(-0 57.5 75.5)"/>
+                    </svg>`
+        };
+
+        // --- PAGE RENDERING FUNCTIONS ---
+
+        function renderHeader(title, showBackButton = false) {
+            return `
+                <div class="p-4 flex items-center justify-between header-shadow bg-white">
+                    <div class="flex items-center space-x-2">
+                        ${showBackButton ? 
+                            `<button onclick="navigate('back')" class="text-gray-600 p-1 rounded-full hover:bg-gray-100 transition">${Icon.Back}</button>` : 
+                            Icon.Logo
+                        }
+                        <!-- Text hidden on very small screens, shown from sm: (small breakpoint) up -->
+                        ${!showBackButton ? `<span class="text-xl font-extrabold text-gray-800 hidden sm:block">Food Hub</span>` : ''}
+                    </div>
+
+                    <!-- Menu Button (only shown on pages without back button) -->
+                    ${!showBackButton ? `
+                        <!-- UPDATED: Menu button now navigates to the 'menu' page -->
+                        <button onclick="navigate('menu')" class="text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">${Icon.Menu}</button>
+                    ` : ''}
+                </div>
+                ${title && title !== 'Login' ? `<div class="p-4 border-b border-gray-100 bg-white">
+                    <h1 class="text-2xl font-extrabold text-center text-[#333333] tracking-tight">${title}</h1>
+                </div>` : ''}
+            `;
+        }
+
+        function renderLoginPage() {
+            const content = `
+                <!-- Login Page Content -->
+                <!-- The flex-grow ensures this content section fills the height on the login page -->
+                <div class="p-8 flex flex-col items-center justify-start flex-grow">
+                    
+                    <!-- Centered Food Hub Logo and Name -->
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <!-- Logo size is w-32 h-32 -->
+                        <div class="w-32 h-32 mb-0"> 
+                            ${Icon.Logo}
+                        </div>
+                        <span class="text-4xl font-extrabold text-teal-600 tracking-wider">FOOD HUB</span>
+                    </div>
+
+                    <h1 class="text-3xl font-extrabold text-[#333333] tracking-tight mb-2 text-center">
+                        Welcome Back!
+                    </h1>
+                    <p class="text-gray-500 mb-8">Sign in to continue your delicious journey.</p>
+
+                    <form class="w-full space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold uppercase text-gray-600">Name</label>
+                            <input type="text" placeholder="Enter Your Name" class="input-field w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 border border-gray-300" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold uppercase text-gray-600">Email</label>
+                            <input type="email" placeholder="Enter Your Email" class="input-field w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 border border-gray-300" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold uppercase text-gray-600">Password</label>
+                            <input type="password" placeholder="Enter Your Password" class="input-field w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 border border-gray-300" />
+                        </div>
+                        
+                        <button type="button" onclick="navigate('home')" class="btn-primary-dark w-full p-3 rounded-xl font-semibold mt-6 shadow-md">
+                            Log in
+                        </button>
+                    </form>
+
+                    <button onclick="console.log('Forgot Password?')" class="text-sm text-teal-600 mt-3 hover:underline font-medium">
+                        Forgot Password?
+                    </button>
+                    
+                    <div class="flex items-center my-6 w-full">
+                        <hr class="flex-grow border-t border-gray-300">
+                        <span class="px-3 text-gray-400 text-sm">or</span>
+                        <hr class="flex-grow border-t border-gray-300">
+                    </div>
+
+                    <button onclick="console.log('Facebook Login')" class="btn-secondary-light w-full p-3 rounded-xl font-semibold flex items-center justify-center space-x-2 mb-3 border border-gray-300 shadow-sm">
+                        <span class="text-lg text-blue-600">f</span> <span>Log in with Facebook</span>
+                    </button>
+                    <button onclick="console.log('Google Login')" class="btn-secondary-light w-full p-3 rounded-xl font-semibold flex items-center justify-center space-x-2 border border-gray-300 shadow-sm">
+                        <span class="text-lg text-red-600">G</span> <span>Log in with Google</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        function renderHomePage() {
+            // Products for Best Sellers section (static mock) - Note: Best sellers are also subject to search/category filters if they happen to match.
+            const bestSellers = allProducts.filter(p => p.id === 'P1' || p.id === 'P2' || p.id === 'P6' || p.id === 'P12' || p.id === 'P3');
+
+            // --- Product Filtering Logic ---
+            
+            // 1. Filter by Category
+            let productsByCategory = activeCategory === 'All' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === activeCategory);
+                
+            // 2. Further filter by Search Query (case-insensitive search across name and description)
+            const lowerCaseQuery = searchQuery.toLowerCase().trim();
+            
+            const filteredProducts = productsByCategory.filter(p => {
+                if (lowerCaseQuery === '') return true; // Show all if no query
+                return p.name.toLowerCase().includes(lowerCaseQuery) ||
+                       p.description.toLowerCase().includes(lowerCaseQuery);
+            });
+            
+            // --- End Filtering Logic ---
+            
+            const categories = ['All', 'Main Course', 'Beverage', 'Dessert', 'Appetizer'];
+            
+            // Calculate unread messages
+            const unreadMessages = mockMessages.filter(m => !m.read);
+            
+            // Reusable card renderer
+            const renderProductCard = (p, isHorizontal = false) => `
+                <div onclick="navigate('cart', { id: '${p.id}', name: '${p.name}', price: ${p.price} })" 
+                    class="bg-white p-3 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-all border border-gray-100 ${isHorizontal ? 'w-[180px] flex-shrink-0' : 'w-full'}">
+                    
+                    <!-- Image component updated to use the uploaded image file reference -->
+                    <img src="${p.imageUrl}" 
+                        alt="${p.name}" 
+                        onerror="this.onerror=null;this.src='https://placehold.co/150x120/14b8a6/ffffff?text=Image+Missing'" 
+                        class="w-full h-32 object-cover rounded-lg mb-2" />
+                        
+                    <p class="text-sm font-semibold text-[#333333] truncate">${p.name}</p>
+                    <p class="text-xs text-gray-600 truncate mb-1">${p.description}</p>
+                    <p class="text-xs font-bold text-red-500">₱${p.price.toFixed(2)}</p>
+                </div>
+            `;
+            
+            // Determine which list to display
+            const isSearching = searchQuery.trim() !== '';
+
+            const content = `
+                <!-- Home/Products Page -->
+                ${renderHeader(null, false)}
+                
+                <!-- Search Bar Section: Fixed height, full width -->
+                <div class="px-4 pt-4 pb-2 bg-white border-b border-gray-100">
+                    <div class="relative flex items-center bg-gray-100 rounded-full pr-4 w-full transition-all duration-300 focus-within:ring-2 focus-within:ring-teal-500">
+                        <input type="text" 
+                            id="searchInput" 
+                            placeholder="Search for Products..." 
+                            class="bg-transparent text-sm p-3 rounded-full focus:outline-none w-full"
+                            value="${searchQuery}" 
+                            oninput="handleSearchInput(this)" 
+                        />
+                        <span class="text-gray-500">${Icon.Search}</span>
+                    </div>
+                </div>
+
+                <!-- Utility Buttons Section: Fixed height, full width -->
+                <div class="p-4 border-b border-gray-100 bg-white">
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- Utility Buttons now link to new pages -->
+                        <button onclick="navigate('orders')" class="flex flex-col items-center justify-center p-2 rounded-xl text-teal-700 hover:bg-teal-50 transition">
+                            ${Icon.Orders}
+                            <span class="text-xs mt-1 font-medium">Orders</span>
+                        </button>
+                        <button onclick="navigate('messages')" class="flex flex-col items-center justify-center p-2 rounded-xl text-teal-700 hover:bg-teal-50 transition">
+                            ${Icon.Message}
+                            <span class="text-xs mt-1 font-medium">Message (${unreadMessages.length})</span>
+                        </button>
+                        <!-- UPDATED: Help button now navigates to the 'help' page -->
+                        <button onclick="navigate('help')" class="flex flex-col items-center justify-center p-2 rounded-xl text-teal-700 hover:bg-teal-50 transition">
+                            ${Icon.Help}
+                            <span class="text-xs mt-1 font-medium">Help</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MAIN SCROLLABLE AREA: flex-grow ensures this area takes up ALL remaining vertical space 
+                     and overflow-y-auto enables scrolling ONLY for this content section. -->
+                <div class="p-4 flex-grow overflow-y-auto bg-gray-50">
+                    
+                    <!-- Best Seller Horizontal Scroll Section - Only visible when not searching -->
+                    ${!isSearching ? `
+                        <h2 class="text-xl font-extrabold text-gray-800 mb-4">⭐ Best Sellers</h2>
+                        <!-- Horizontal Scroll Container for Products -->
+                        <div class="flex space-x-4 overflow-x-auto pb-2 mb-6">
+                            ${bestSellers.map(p => renderProductCard(p, true)).join('')}
+                        </div>
+                    ` : ''}
+
+                    <!-- Category Tabs - Only visible when not searching -->
+                    ${!isSearching ? `
+                        <h2 class="text-xl font-extrabold text-gray-800 mb-4">Browse Categories</h2>
+                        <!-- Horizontal Scroll Container for Categories -->
+                        <div class="flex space-x-3 overflow-x-auto pb-2 mb-6">
+                            ${categories.map(cat => `
+                                <button onclick="setCategoryFilter('${cat}')" 
+                                    class="flex-shrink-0 text-sm px-4 py-2 rounded-full font-semibold shadow-md transition-colors
+                                    ${activeCategory === cat ? 'color-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+                                >
+                                    ${cat}
+                                </button>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Filtered Products Grid (Vertical Scroll) -->
+                    <h2 class="text-xl font-extrabold text-gray-800 mb-4">
+                        ${isSearching ? 
+                            `Search Results for "${searchQuery}" (${filteredProducts.length})` : 
+                            `${activeCategory} Items (${filteredProducts.length})`
+                        }
+                    </h2>
+                    <!-- Product grid remains simple 2-column layout, which works well within the max-w-md constraint -->
+                    <div class="grid grid-cols-2 gap-4">
+                        ${filteredProducts.length > 0 ? 
+                            filteredProducts.map(renderProductCard).join('')
+                            : 
+                            `<p class="text-gray-500 col-span-2">No products found matching "${isSearching ? searchQuery : activeCategory}".</p>`
+                        }
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        function renderCartPage() {
+            const subtotal = calculateTotal();
+            const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+            // If cart is empty, show a dedicated message
+            if (cartItems.length === 0) {
+                return `
+                    ${renderHeader('My Cart', true)}
+                    <div class="p-6 flex flex-col items-center justify-center flex-grow bg-gray-50 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2h2.07L7.5 10.42a2 2 0 0 1-2 2H19"/><path d="M16 16h6l-1-7H5"/><path d="M10 21h8"/></svg>
+                        <h2 class="text-xl font-extrabold text-gray-700 mb-2">Your Cart is Empty</h2>
+                        <p class="text-gray-500 mb-6">Start adding some delicious items to your order!</p>
+                        <button onclick="navigate('home')" class="btn-primary-dark p-3 px-6 rounded-xl font-semibold">
+                            Start Shopping
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Reusable card for each item in the cart - **NOW USES item.imageUrl**
+            const itemCard = (item) => `
+                <div class="bg-white p-4 rounded-xl shadow-md flex items-center mb-4 border border-teal-200/50">
+                    <!-- Image container uses w-20 h-20 for consistent size across mobile and desktop app view -->
+                    <img src="${item.imageUrl}" 
+                         alt="${item.name}" 
+                         onerror="this.onerror=null;this.src='https://placehold.co/96x96/f0f9ff/14b8a6?text=Item'"
+                         class="w-20 h-20 object-cover rounded-lg mr-4 flex-shrink-0" />
+                    <div class="flex-grow min-w-0">
+                        <h3 class="font-bold text-lg text-[#333333] truncate">${item.name}</h3>
+                        <p class="text-sm text-red-600 font-semibold">@ ₱${item.price.toFixed(2)}</p>
+                        <p class="text-xs text-gray-500 mt-1">Total for item: ₱${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                    
+                    <!-- Quantity Control and Remove -->
+                    <div class="flex items-center space-x-1 flex-shrink-0 ml-2">
+                        <button 
+                            onclick="updateItemQuantity('${item.id}', -1)" 
+                            class="bg-gray-200 text-gray-800 w-7 h-7 rounded-full font-bold text-sm hover:bg-gray-300 disabled:opacity-50 transition" 
+                            ${item.quantity <= 1 ? 'disabled' : ''}
+                        >-</button>
+                        <span class="text-lg font-extrabold w-5 text-center">${item.quantity}</span>
+                        <button 
+                            onclick="updateItemQuantity('${item.id}', 1)" 
+                            class="bg-teal-500 text-white w-7 h-7 rounded-full font-bold text-sm hover:bg-teal-600 transition"
+                        >+</button>
+                        <button 
+                            onclick="removeItemFromCart('${item.id}')"
+                            title="Remove Item"
+                            class="text-red-500 hover:text-red-700 p-1"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const content = `
+                <!-- My Cart Page -->
+                ${renderHeader('My Cart', true)}
+
+                <div class="p-6 flex flex-col justify-between flex-grow bg-gray-50">
+                    <!-- Cart items list is set to overflow-y-auto to allow scrolling if too many items are added -->
+                    <div class="flex-grow overflow-y-auto pr-2">
+                        <h2 class="text-xl font-extrabold text-gray-800 mb-4">Items in Cart (${cartItems.length} unique items)</h2>
+                        <!-- List of Products in Cart -->
+                        ${cartItems.map(itemCard).join('')}
+
+                        <!-- "Want to add more" Button -->
+                        <button onclick="navigate('home')" class="btn-secondary-light w-full p-3 rounded-xl font-semibold mt-4 flex items-center justify-center space-x-2 border border-gray-300 hover:bg-gray-300 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-teal-600"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            <span class="text-teal-700">Want to add more?</span>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-t-xl shadow-2xl border-t border-gray-200 mt-4">
+                        <!-- Total Price Summary -->
+                        <div class="flex justify-between font-extrabold text-xl">
+                            <span>Order Total (${totalUnits} units)</span>
+                            <span class="text-red-600">₱${subtotal.toFixed(2)}</span>
+                        </div>
+
+                        <button type="button" onclick="navigate('payment')" class="btn-primary-dark w-full p-4 rounded-xl font-extrabold text-lg shadow-2xl mt-4">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        function renderPaymentPage() {
+            const subtotal = calculateTotal();
+            const deliveryFee = 50.00;
+            const totalPrice = subtotal + deliveryFee;
+            const totalUnits = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+            // Payment method data with custom colors and SVGs
+            const paymentMethods = [
+                { id: 'cod', name: 'Cash on Delivery', fee: '₱50.00', color: 'cod', 
+                  icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 20h.01"/><path d="M16.62 4.47c.56 1.48-.45 3.01-2.91 3.51a5.96 5.96 0 0 1-3.48-.07c-2.46-.5-3.47-2.03-2.91-3.51.56-1.48 2.37-2.5 4.83-2.52 2.46.02 4.27 1.04 4.83 2.52z"/><path d="M12 11c-2.48 0-4.5 2.02-4.5 4.5S9.52 20 12 20s4.5-2.02 4.5-4.5S14.48 11 12 11z"/><path d="M12 14v1"/><path d="M11 16h2"/></svg>` },
+                { id: 'gcash', name: 'Gcash', fee: 'Free', color: 'gcash', 
+                  icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>` },
+                { id: 'maya', name: 'Maya', fee: 'Free', color: 'maya', 
+                  icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>` },
+                { id: 'credit', name: 'Credit / Debit Card', fee: 'Free', color: 'gray-500', 
+                  icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>` }
+            ];
+
+            // Updated paymentOption to REMOVE the fee display
+            const paymentOption = (method) => {
+                const isSelected = selectedPaymentMethod === method.id;
+                const baseClasses = "flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition duration-300 ease-in-out hover:shadow-sm";
+                const selectedClasses = "border-teal-500 bg-teal-50 shadow-lg ring-2 ring-teal-200"; 
+
+                return `
+                    <div class="payment-option" onclick="selectPaymentMethod('${method.id}')">
+                        <input type="radio" id="${method.id}" name="payment-method" value="${method.id}" class="hidden peer" ${isSelected ? 'checked' : ''}>
+                        <label for="${method.id}" 
+                            class="${baseClasses} ${isSelected ? selectedClasses : ''}"
+                        >
+                            <div class="flex items-center space-x-4">
+                                <!-- Icon with Brand Color Styling -->
+                                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-${method.color} bg-opacity-10 text-${method.color} transition">
+                                    ${method.icon}
+                                </div>
+                                <span class="text-lg font-medium text-gray-800">${method.name}</span>
+                            </div>
+                            
+                            <!-- Custom Radio Dot Indicator (Fee/Free text removed from here) -->
+                            <div class="flex items-center space-x-3">
+                                
+                                <!-- CUSTOM RADIO DOT INDICATOR -->
+                                <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-teal-500' : 'border-gray-400'} flex items-center justify-center transition-all">
+                                    <div class="w-3 h-3 rounded-full bg-white transition-transform duration-300 transform ${isSelected ? 'bg-teal-500 scale-100' : 'scale-0'}"></div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            };
+
+
+            const content = `
+                <!-- Payment Method Page -->
+                ${renderHeader('Payment Method', true)}
+                
+                <div class="p-6 flex flex-col justify-between flex-grow bg-gray-50">
+                    <div class="overflow-y-auto pr-2">
+                        <h2 class="text-xl font-extrabold text-gray-800 mb-4">Select Payment Option</h2>
+                        
+                        <form class="space-y-3">
+                            <!-- Render payment options -->
+                            ${paymentMethods.map(paymentOption).join('')}
+                        </form>
+
+                        <h2 class="text-xl font-extrabold text-gray-800 mt-8 mb-4">Delivery Address</h2>
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm text-gray-700">
+                            <p class="font-bold">Home Address:</p>
+                            <p class="text-sm">123 Flavor St, Food City, PH 1234</p>
+                            <button onclick="console.log('Change Address')" class="text-teal-500 text-sm mt-2 hover:underline">Change</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed bottom element for checkout summary -->
+                    <div class="bg-white p-4 rounded-t-xl shadow-2xl">
+                        <!-- Price Summary (Updated to reflect full cart) -->
+                        <div class="space-y-2 text-md text-[#333333] font-medium">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Items (${cartItems.length} unique, ${totalUnits} units)</span>
+                                <span>₱${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-dashed pb-2">
+                                <span class="text-gray-600">Delivery Service</span>
+                                <span>₱${deliveryFee.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between font-extrabold text-xl pt-2">
+                                <span>Total Price</span>
+                                <span class="text-red-600">₱${totalPrice.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Button now calls the order processing function -->
+                        <button type="button" onclick="processOrder()" class="btn-primary-dark w-full p-4 rounded-xl font-extrabold mt-4 shadow-xl">
+                            Confirm Order
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        function renderSubmittedPage() {
+            // Get the last order placed for confirmation details
+            const lastOrder = mockOrders.length > 0 ? mockOrders[0] : null;
+
+            if (!lastOrder) {
+                // Should not happen if processOrder is called correctly, but good for safety
+                // We'll just navigate back to home if no order is found
+                navigate('home'); 
+                return ''; // Return empty string to prevent rendering logic
+            }
+
+            const totalUnits = lastOrder.items.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Map payment ID to display name for submitted page
+            const paymentMethodName = {
+                cod: 'Cash on Delivery', gcash: 'Gcash', maya: 'Maya', credit: 'Credit / Debit Card'
+            }[lastOrder.payment] || 'Unknown';
+
+            const content = `
+                <!-- Order Submitted Page -->
+                <div class="p-6 flex flex-col items-center justify-start flex-grow bg-gray-50">
+                    <!-- Custom Back Button (since there's no header bar here) -->
+                    <!-- USER REQUEST: Clicking back now explicitly navigates to the 'home' page -->
+                    <button onclick="navigate('home')" class="self-start text-gray-600 p-2 mb-16 rounded-full hover:bg-gray-200 transition">${Icon.Back}</button>
+                    
+                    ${Icon.CheckCircle}
+                    
+                    <h1 class="text-3xl font-extrabold text-center text-[#333333] tracking-tight mt-6">Order Submitted!</h1>
+                    <p class="text-gray-500 text-center mt-2">Your order is confirmed and will be delivered soon.</p>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm mt-8 border-t-4 border-teal-500">
+                        <p class="text-sm font-semibold text-gray-600">Order ID:</p>
+                        <p class="text-lg font-bold mb-4">${lastOrder.id}</p>
+                        <p class="text-sm font-semibold text-gray-600">Items Ordered (${lastOrder.items.length} unique):</p>
+                        <!-- List all items -->
+                        <div class="text-md font-semibold mb-2 space-y-1">
+                            ${lastOrder.items.map(i => `<li class="truncate text-gray-800">${i.name} (x${i.quantity})</li>`).join('')}
+                            <p class="pt-2 text-sm text-gray-500 font-normal border-t border-dashed">Total ${totalUnits} units.</p>
+                        </div>
+                        <p class="text-sm font-semibold text-gray-600 mt-4">Total Paid:</p>
+                        <p class="text-lg font-bold text-red-600">₱${lastOrder.total.toFixed(2)} (${paymentMethodName})</p>
+                    </div>
+
+                    <button type="button" onclick="navigate('orders')" class="btn-primary-dark w-full max-w-sm p-4 rounded-xl font-extrabold mt-12 shadow-xl">
+                        View Orders History
+                    </button>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+        
+        // Orders History Page
+        function renderOrdersPage() {
+            // FIX: Mark all messages as read upon viewing the page (UX improvement)
+            mockMessages = mockMessages.map(m => ({ ...m, read: true }));
+            
+            const content = `
+                <!-- Orders History Page -->
+                ${renderHeader('Order History', true)}
+
+                <div class="p-6 flex-grow overflow-y-auto bg-gray-50">
+                    <h2 class="text-xl font-extrabold text-gray-800 mb-4">Past Orders (${mockOrders.length})</h2>
+                    
+                    ${mockOrders.length === 0 ? 
+                        `<p class="text-gray-500 text-center py-10">You haven't placed any orders yet.</p>` 
+                        : 
+                        mockOrders.map(order => {
+                            const totalUnits = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                            
+                            // Payment method is REMOVED from this card per user request.
+                            
+                            return `
+                                <div class="bg-white p-4 rounded-xl shadow-md mb-4 border-l-4 ${order.status === 'Confirmed' ? 'border-teal-500' : 'border-gray-300'}">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="font-bold text-lg text-gray-800">Order ${order.id.substring(4, 12)}</h3>
+                                        <span class="text-xs font-medium text-white px-3 py-1 rounded-full ${order.status === 'Confirmed' ? 'bg-teal-500' : 'bg-gray-400'}">${order.status}</span>
+                                    </div>
+                                    <!-- Only showing placement date -->
+                                    <p class="text-sm text-gray-500 mt-1">Placed: ${order.date}</p>
+                                    <p class="text-xl font-extrabold text-red-600 mt-2">₱${order.total.toFixed(2)}</p>
+                                    <ul class="text-sm text-gray-700 mt-3 space-y-0.5 border-t pt-2">
+                                        ${order.items.map(item => `<li class="truncate">- ${item.name} (x${item.quantity})</li>`).join('')}
+                                        <li class="text-xs text-gray-400 pt-1">Total: ${totalUnits} units</li>
+                                    </ul>
+                                </div>
+                            `;
+                        }).join('')
+                    }
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        // Messages Log Page
+        function renderMessagesPage() {
+            // FIX: Mark all messages as read upon viewing the page (UX improvement)
+            mockMessages = mockMessages.map(m => ({ ...m, read: true }));
+            
+            const content = `
+                <!-- Messages Log Page -->
+                ${renderHeader('Messages', true)}
+
+                <div class="p-6 flex-grow overflow-y-auto bg-gray-50">
+                    <h2 class="text-xl font-extrabold text-gray-800 mb-4">System Notifications (${mockMessages.length})</h2>
+                    
+                    ${mockMessages.length === 0 ? 
+                        `<p class="text-gray-500 text-center py-10">You have no new messages.</p>` 
+                        : 
+                        mockMessages.map(message => `
+                            <div class="bg-white p-4 rounded-xl shadow-md mb-4 border-l-4 border-teal-500">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-lg text-teal-800">${message.subject}</h3>
+                                    <span class="text-xs text-gray-500">${message.date}</span>
+                                </div>
+                                <p class="text-sm text-gray-700 mt-2">${message.content}</p>
+                                <p class="text-xs text-teal-600 mt-2">Related to Order ID: ${message.id.substring(4)}</p>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        // Help and Support Page
+        function renderHelpPage() {
+            const content = `
+                <!-- Help & Support Page -->
+                ${renderHeader('Help & Support', true)}
+
+                <div class="p-6 flex flex-col flex-grow overflow-y-auto bg-gray-50">
+                    <div class="bg-white p-5 rounded-xl shadow-lg mb-6 border-t-4 border-teal-500">
+                        <h2 class="text-xl font-extrabold text-gray-800 mb-3">How to Use Food Hub</h2>
+                        <ul class="text-gray-700 space-y-3 text-sm">
+                            <li class="flex items-start">
+                                <span class="font-bold text-teal-600 mr-2">1. Ordering:</span>
+                                <span>Browse the **Home** page, tap on any food item to add it to your cart.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-teal-600 mr-2">2. Cart & Checkout:</span>
+                                <span>Navigate to the **Cart** to adjust quantities, then proceed to **Payment** to finalize the order.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-teal-600 mr-2">3. Orders Log:</span>
+                                <span>View all your past purchases and their details under the **Orders** icon on the Home screen.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-teal-600 mr-2">4. Messages:</span>
+                                <span>Check the **Message** icon for automated confirmations and system notifications about your orders.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-xl font-extrabold text-gray-800 mb-4">Need further assistance?</h2>
+                    
+                    <button onclick="console.log('Contacted by Email')" class="btn-secondary-light w-full p-4 rounded-xl font-semibold mb-3 flex items-center justify-center space-x-3 border border-gray-300 hover:bg-gray-300 transition">
+                        ${Icon.Email}
+                        <span class="text-teal-700">Send us an Email</span>
+                    </button>
+                    
+                    <button onclick="console.log('Contacted by Phone')" class="btn-secondary-light w-full p-4 rounded-xl font-semibold flex items-center justify-center space-x-3 border border-gray-300 hover:bg-gray-300 transition">
+                        ${Icon.Phone}
+                        <span class="text-teal-700">Call Customer Service (9AM - 5PM)</span>
+                    </button>
+
+                    <div class="mt-8 text-center text-sm text-gray-500">
+                        <p>&copy; 2024 Food Hub Prototype. All rights reserved.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+        // NEW PAGE: Settings and Profile
+        function renderMenuPage() {
+            
+            // Helper function for rendering clickable menu links
+            const renderMenuLink = (text, onClick, icon) => `
+                <button onclick="${onClick}" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                    <div class="flex items-center space-x-3 text-gray-700">
+                        <span class="text-teal-600">${icon}</span>
+                        <span class="font-medium">${text}</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            `;
+
+            const content = `
+                <!-- Settings & Profile Page -->
+                ${renderHeader('Settings & Profile', true)}
+
+                <div class="p-6 flex-grow overflow-y-auto bg-gray-50">
+                    
+                    <!-- User Profile Card (Mock Data) -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg mb-6 flex items-center space-x-4 border-l-4 border-teal-500">
+                        <div class="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 border-4 border-white shadow-md">
+                            ${Icon.Profile}
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-extrabold text-gray-800">John Doe</h2>
+                            <p class="text-sm text-gray-500">johndoe@foodhub.com</p>
+                        </div>
+                    </div>
+
+                    <!-- Settings Links Section -->
+                    <h3 class="text-lg font-bold text-gray-700 mb-3">Account Settings</h3>
+                    <div class="bg-white rounded-xl shadow-md divide-y divide-gray-100">
+                        ${renderMenuLink('Edit Profile', 'console.log("Edit Profile Clicked")', Icon.Profile)}
+                        ${renderMenuLink('Payment Settings', 'console.log("Payment Settings Clicked")', Icon.Settings)}
+                        ${renderMenuLink('Notifications', 'console.log("Notifications Clicked")', Icon.Message)}
+                        ${renderMenuLink('Help & Feedback', 'navigate("help")', Icon.Help)}
+                    </div>
+                    
+                    <!-- Logout -->
+                    <button onclick="navigate('login')" class="flex items-center justify-center w-full mt-8 p-4 bg-red-100 text-red-600 font-bold rounded-xl shadow-lg hover:bg-red-200 transition space-x-3">
+                        ${Icon.Logout}
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = content;
+        }
+
+
+        // --- MAIN RENDER LOGIC ---
+        function render() {
+            // Remove previous content
+            document.getElementById('app').innerHTML = '';
+
+            // Render the specific page
+            switch (currentPage) {
+                case 'login':
+                    renderLoginPage();
+                    break;
+                case 'home':
+                    renderHomePage();
+                    break;
+                case 'cart':
+                    renderCartPage();
+                    break;
+                case 'payment':
+                    renderPaymentPage();
+                    break;
+                case 'submitted':
+                    renderSubmittedPage();
+                    break;
+                case 'orders': 
+                    renderOrdersPage();
+                    break;
+                case 'messages': 
+                    renderMessagesPage();
+                    break;
+                case 'help': 
+                    renderHelpPage();
+                    break;
+                case 'menu': // NEW CASE
+                    renderMenuPage();
+                    break;
+                default:
+                    // Fallback to login if state is bad
+                    currentPage = 'login';
+                    renderLoginPage();
+                    break;
+            }
+            
+            // Restore focus and cursor position after re-render (only on the home page)
+            if (currentPage === 'home') {
+                const searchInput = document.getElementById('searchInput');
+                
+                // Only restore focus and cursor position if the user was actively typing 
+                if (searchInput && cursorPosition !== null) { 
+                    // Re-focus the element that was being typed into
+                    searchInput.focus(); 
+                    
+                    // Restore the cursor position
+                    searchInput.setSelectionRange(cursorPosition, cursorPosition);
+                }
+            }
+        }
+
+        // Initialize the app on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Use mock data to ensure the new pages (Orders, Messages) have content initially
+            mockOrders = [
+                 { id: 'ORD-1701234567890-1', items: [{name: "Spicy Noodle Soup", quantity: 1, price: 180}], total: 230.00, date: '10/16/2024, 10:00 AM', status: 'Confirmed', payment: 'cod' },
+                 { id: 'ORD-1701234567890-2', items: [{name: "Fresh Garden Salad", quantity: 2, price: 120}, {name: "Iced Caramel Coffee", quantity: 1, price: 100}], total: 340.00 + 50, date: '10/16/2024, 11:30 AM', status: 'Delivered', payment: 'gcash' }
+            ];
+            mockMessages = [
+                 { id: 'MSG-ORD-1701234567890-1', subject: 'Order Confirmed', content: 'Your order ORD-170... for 1 item totaling ₱230.00 has been confirmed.', date: '10/16/2024, 10:01 AM', read: true },
+                 { id: 'MSG-ORD-1701234567890-2', subject: 'Order Delivered', content: 'Your order ORD-170... for 3 items totaling ₱390.00 has been successfully delivered.', date: '10/16/2024, 12:00 PM', read: false }
+            ];
+            
+            render();
+        });
+
+    </script>
+</body>
+</html>
