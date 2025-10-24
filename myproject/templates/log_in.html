@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Wireframe_Template</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Define custom colors and font for the Tailwind config
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'], // Assuming 'Inter' or a similar sans-serif font
+                    },
+                    colors: {
+                        'page-bg': '#f5f5f5', // Very subtle light gray background
+                        'dark-text': '#1f2937', // Darkest text/button color (near gray-900)
+                        'light-text': '#4b5563', // Subtitle/label color (near gray-600)
+                        'input-bg': '#d1d5db', // Distinct light gray for inputs/secondary buttons (near gray-300)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Properties for better CSS management */
+        :root {
+            --dark-text: #1f2937;
+            --light-text: #4b5563;
+        }
+
+        /* Body background matching the image's overall light gray tone */
+        body {
+            background-color: var(--page-bg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom style for the Logo Placeholder 'X' lines */
+        .logo-placeholder {
+            position: relative;
+            background-color: white; /* Logo box background is white */
+            overflow: hidden; /* Ensures rotated lines are contained within the border */
+        }
+        
+        .logo-placeholder::before, .logo-placeholder::after {
+            content: '';
+            position: absolute;
+            top: 50%; /* Position in the middle vertically */
+            left: 50%; /* Position in the middle horizontally */
+            width: 141.42%; /* sqrt(2)*100% to span the diagonal of a square */
+            height: 2px; /* Line thickness */
+            background-color: var(--light-text);
+            transform-origin: center; /* Rotate around the center */
+        }
+        /* Rotate to create the X shape */
+        .logo-placeholder::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .logo-placeholder::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .logo-inner-text {
+            position: relative; /* Needed for z-index to work */
+            z-index: 10; /* Ensures text is above lines */
+            background-color: white; /* Text background must be white to cover the 'X' lines behind it */
+            padding: 0 0.5rem; /* Small padding around the text */
+            font-size: 1rem; /* Adjust text size if needed, based on image */
+        }
+
+        /* Match the specific divider line style */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin-top: 1.5rem; /* Spacing from picture */
+            margin-bottom: 1.5rem; /* Spacing to social buttons */
+            color: var(--light-text);
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* medium weight */
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #9ca3af; /* A medium-light gray line color */
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center items-center px-6 sm:px-0">
+    <main class="w-full max-w-xs flex flex-col items-center py-10">
+
+        <div class="logo-placeholder w-40 h-40 border-2 border-dark-text relative flex items-center justify-center mb-10">
+            <div class="logo-inner-text text-dark-text font-semibold text-center text-base">
+                Picture of Logo
+            </div>
+        </div>
+
+        <h1 class="text-4xl font-extrabold text-dark-text mb-2">
+            Log In!
+        </h1>
+        <p class="text-light-text mb-10 text-base">
+            Sign in to continue.
+        </p>
+
+        <form class="w-full space-y-6">
+
+            <div class="space-y-1">
+                <label for="name" class="text-xs font-semibold text-light-text uppercase tracking-wider block">
+                    Name
+                </label>
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="Enter Your Name"
+                    class="bg-input-bg w-full rounded-xl border-none p-3 focus:ring-2 focus:ring-dark-text placeholder-light-text font-medium text-lg focus:outline-none"
+                    required
+                >
+            </div>
+
+            <div class="space-y-1">
+                <label for="email" class="text-xs font-semibold text-light-text uppercase tracking-wider block">
+                    Email
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter Your Email"
+                    class="bg-input-bg w-full rounded-xl border-none p-3 focus:ring-2 focus:ring-dark-text placeholder-light-text font-medium text-lg focus:outline-none"
+                    required
+                >
+            </div>
+
+            <div class="space-y-1">
+                <label for="password" class="text-xs font-semibold text-light-text uppercase tracking-wider block">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter Your Password"
+                    class="bg-input-bg w-full rounded-xl border-none p-3 focus:ring-2 focus:ring-dark-text placeholder-light-text font-medium text-lg focus:outline-none"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="w-full bg-dark-text text-white font-bold py-3 rounded-xl mt-8 shadow-md hover:bg-gray-800 transition duration-150 text-lg focus:outline-none focus:ring-4 focus:ring-dark-text focus:ring-opacity-50"
+            >
+                Log in
+            </button>
+
+        </form>
+
+        <a href="#" class="text-sm text-light-text mt-4 mb-4 hover:underline focus:outline-none focus:ring-2 focus:ring-light-text rounded-md px-1">
+            Forgot Password?
+        </a>
+
+        <div class="divider w-full">
+            or
+        </div>
+
+        <div class="w-full space-y-4 mt-4">
+            <button
+                type="button"
+                class="bg-input-bg w-full text-dark-text font-bold py-3 rounded-xl shadow-md hover:opacity-80 transition duration-150 text-lg focus:outline-none focus:ring-2 focus:ring-dark-text"
+            >
+                Log in with Facebook
+            </button>
+            <button
+                type="button"
+                class="bg-input-bg w-full text-dark-text font-bold py-3 rounded-xl shadow-md hover:opacity-80 transition duration-150 text-lg focus:outline-none focus:ring-2 focus:ring-dark-text"
+            >
+                Log in with Google
+            </button>
+        </div>
+
+    </main>
+</body>
+</html>

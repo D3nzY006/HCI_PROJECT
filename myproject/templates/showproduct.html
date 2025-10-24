@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart - Product Detail</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'], // Standard font
+                    },
+                    colors: {
+                        'page-bg': '#f5f5f5', // Main light gray background
+                        'dark-gray': '#374151', // Primary text and button color
+                        'medium-gray': '#6b7280', // Icon and placeholder text color
+                        'light-gray-bg': '#e5e7eb', // Search bar background
+                        'white-box': '#ffffff', // Card backgrounds
+                        'border-gray': '#d1d5db', // Light border color
+                        'buy-button-dark': '#343a40', // Dark button color (slightly darker than dark-gray for depth)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: var(--page-bg);
+            font-family: 'Inter', 'sans-serif';
+        }
+
+        /* --- Custom Styles for Wireframe Elements --- */
+
+        /* Styles for the "Logo Picture" box (Header top-left) */
+        .logo-box {
+            position: relative;
+            background-color: var(--white-box);
+            border: 1px solid var(--dark-gray); /* Dark border for prominence */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-weight: 600; 
+            color: var(--dark-gray); 
+        }
+
+        /* Specific 'X' lines for the logo */
+        .logo-box::before, .logo-box::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 141.42%; /* Spans the diagonal */
+            height: 1px; 
+            background-color: var(--dark-gray); 
+            transform-origin: center;
+        }
+        .logo-box::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .logo-box::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .logo-box-text {
+            position: relative;
+            z-index: 10;
+            background-color: var(--white-box); /* Masks the 'X' lines underneath the text */
+            padding: 0 0.4rem;
+        }
+
+        /* Generic Product Image Placeholder with large 'X' */
+        .product-placeholder {
+            position: relative;
+            background-color: var(--white-box);
+            border: 2px solid var(--dark-gray); /* Thicker border as seen in the image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--dark-gray); 
+            font-weight: 700; /* Bold for "Product" text */
+        }
+
+        /* 'X' lines for the main product placeholder */
+        .product-placeholder::before, .product-placeholder::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 141.42%; 
+            height: 2px; /* Thicker lines for the main image */
+            background-color: var(--medium-gray); /* Gray 'X' lines */
+            transform-origin: center;
+        }
+        .product-placeholder::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .product-placeholder::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .product-placeholder-text {
+             position: relative;
+             z-index: 10;
+        }
+
+
+        /* Custom horizontal rule for the divider lines in the pricing section */
+        .hr-divider {
+            border-top: 1px solid var(--border-gray); /* Light gray border for HR */
+            width: 100%;
+        }
+
+    </style>
+</head>
+<!-- Centered both horizontally and constrained to mobile width -->
+<body class="min-h-screen flex justify-center py-4 bg-page-bg">
+    <!-- Main mobile container, max-width is xs (320px) to match small phone size -->
+    <div class="w-full max-w-xs bg-white-box shadow-lg border border-border-gray" style="max-height: 95vh; overflow-y: auto;">
+        <div class="w-full flex flex-col">
+
+            <!-- 1. Header (Logo, Search Bar, Menu Icon) -->
+            <header class="flex items-center justify-between p-4 border-b border-border-gray bg-white-box">
+                <!-- Logo Picture Box -->
+                <div class="logo-box w-20 h-8 text-xs font-semibold rounded-md">
+                    <span class="logo-box-text">Logo Picture</span>
+                </div>
+
+                <!-- Search Input -->
+                <div class="flex-grow flex items-center bg-light-gray-bg rounded-full py-1 px-3 ml-3 mr-3 border border-border-gray">
+                    <!-- Magnifying Glass Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-medium-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" placeholder="Search for Products...." class="flex-grow bg-transparent border-none focus:outline-none text-sm text-dark-gray placeholder-medium-gray ml-2">
+                </div>
+
+                <!-- Hamburger Menu Icon (SVG) -->
+                <button class="text-dark-gray focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </header>
+
+            <!-- 2. Back Button and "My Cart" Title -->
+            <section class="p-4 flex items-center bg-white-box border-b border-border-gray">
+                <!-- Back Arrow Icon (SVG) -->
+                <button class="text-dark-gray mr-4 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </button>
+                <!-- Title centered by using flex-grow and padding to offset the back button -->
+                <h1 class="text-2xl font-extrabold text-dark-gray flex-grow text-center pr-12">
+                    My Cart
+                </h1>
+            </section>
+
+            <!-- 3. Main Product Image Placeholder -->
+            <section class="p-4 bg-white-box">
+                <div class="product-placeholder w-full h-80 text-3xl font-bold rounded-lg">
+                    <span class="product-placeholder-text">Product</span>
+                </div>
+            </section>
+
+            <!-- 4. Price and Product Name Section -->
+            <section class="p-4 pt-6 bg-page-bg">
+                <!-- Top Divider Line -->
+                <hr class="hr-divider mb-6">
+                
+                <p class="text-xl font-bold text-dark-gray mb-6 text-left">
+                    ₱150.00
+                </p>
+                
+                <h2 class="text-2xl font-bold text-dark-gray text-center leading-snug">
+                    Sweetened<br>Banana/Dessert
+                </h2>
+                
+                <!-- Bottom Divider Line -->
+                <hr class="hr-divider mt-6">
+            </section>
+            
+            <!-- 5. "Buy now" Button (Fixed position at the bottom of the visible area in the wireframe) -->
+            <section class="p-4 bg-page-bg flex justify-center pt-8 flex-grow">
+                <button
+                    type="button"
+                    class="w-full bg-buy-button-dark text-white-box font-bold py-4 rounded-xl shadow-md hover:bg-gray-700 transition duration-150 text-lg focus:outline-none focus:ring-4 focus:ring-buy-button-dark focus:ring-opacity-50"
+                >
+                    Buy now
+                </button>
+            </section>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page Wireframe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'page-bg': '#f5f5f5', // Main light gray background
+                        'dark-gray': '#374151', // For main text, icons, borders (like gray-700)
+                        'medium-gray': '#6b7280', // For placeholder text (like gray-500)
+                        'light-gray-bg': '#e5e7eb', // For search bar, category buttons background (like gray-200)
+                        'white-box': '#ffffff', // For card backgrounds
+                        'border-gray': '#d1d5db', // For borders (like gray-300)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: var(--page-bg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Generic placeholder for images or content areas with an 'X' */
+        .placeholder-box {
+            position: relative;
+            background-color: var(--white-box);
+            border: 1px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--medium-gray);
+            font-weight: 600; /* semi-bold */
+        }
+
+        .placeholder-box::before, .placeholder-box::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 141.42%; /* Diagonal length for a square */
+            height: 1px; /* Line thickness */
+            background-color: var(--border-gray);
+            transform-origin: center;
+        }
+        .placeholder-box::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .placeholder-box::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .logo-box {
+            position: relative;
+            background-color: var(--white-box);
+            border: 1px solid var(--dark-gray); /* Darker border as in the image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-weight: 600; /* semi-bold */
+            color: var(--dark-gray); /* Darker text */
+        }
+
+        /* Specific styles for the logo box 'X' */
+        .logo-box::before, .logo-box::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 141.42%;
+            height: 1px; /* Line thickness */
+            background-color: var(--dark-gray); /* Darker 'X' lines */
+            transform-origin: center;
+        }
+        .logo-box::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .logo-box::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .logo-box-text {
+            position: relative;
+            z-index: 10;
+            background-color: var(--white-box); /* White background to mask lines */
+            padding: 0 0.4rem;
+        }
+
+        /* Custom scrollbar for horizontal categories to match wireframe visual (optional, but good for exact match) */
+        .category-scroll-container::-webkit-scrollbar {
+            height: 0px; /* Hide scrollbar */
+            background: transparent; /* make scrollbar transparent */
+        }
+        .category-scroll-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center py-4">
+    <div class="w-full max-w-xs bg-white-box shadow-lg border border-border-gray overflow-y-auto" style="height: 800px; max-height: 90vh;">
+        <div class="w-full h-full flex flex-col">
+
+            <header class="flex items-center justify-between p-4 border-b border-border-gray">
+                <div class="logo-box w-20 h-8 text-xs font-semibold">
+                    <span class="logo-box-text">Logo Picture</span>
+                </div>
+
+                <div class="flex-grow flex items-center bg-light-gray-bg rounded-full py-1 px-3 ml-3 mr-3 border border-border-gray">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-medium-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" placeholder="Search for Products...." class="flex-grow bg-transparent border-none focus:outline-none text-sm text-dark-gray placeholder-medium-gray ml-2">
+                </div>
+
+                <button class="text-dark-gray focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </header>
+
+            <nav class="flex justify-around border-b border-border-gray bg-white-box">
+                <button class="flex flex-col items-center py-3 px-4 text-dark-gray text-xs font-medium focus:outline-none hover:bg-light-gray-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    Orders
+                </button>
+                <button class="flex flex-col items-center py-3 px-4 text-dark-gray text-xs font-medium border-l border-border-gray focus:outline-none hover:bg-light-gray-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    Message
+                </button>
+                <button class="flex flex-col items-center py-3 px-4 text-dark-gray text-xs font-medium border-l border-border-gray focus:outline-none hover:bg-light-gray-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9.208a4.212 4.212 0 01.378-.073C9.172 9.06 10.02 9 11 9c.642 0 1.258.053 1.855.158m-.932-.073L12 9a4.212 4.212 0 01.378.073c.597.105 1.18.271 1.748.497M13 12.01V12h-.01M10 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Help
+                </button>
+            </nav>
+
+            <section class="p-4 border-b border-border-gray bg-white-box">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="placeholder-box h-32 text-base">
+                        Best Seller
+                    </div>
+                    <div class="placeholder-box h-32 text-base">
+                        Best Seller
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white-box p-4 border-b border-border-gray">
+                <div class="flex space-x-2 overflow-x-auto category-scroll-container">
+                    <button class="flex-shrink-0 bg-dark-gray text-white-box text-sm px-4 py-2 rounded-lg font-medium focus:outline-none">
+                        All
+                    </button>
+                    <button class="flex-shrink-0 bg-light-gray-bg text-dark-gray text-sm px-4 py-2 rounded-lg font-medium border border-border-gray focus:outline-none hover:bg-border-gray">
+                        Main Course
+                    </button>
+                    <button class="flex-shrink-0 bg-light-gray-bg text-dark-gray text-sm px-4 py-2 rounded-lg font-medium border border-border-gray focus:outline-none hover:bg-border-gray">
+                        Beverage
+                    </button>
+                    <button class="flex-shrink-0 bg-light-gray-bg text-dark-gray text-sm px-4 py-2 rounded-lg font-medium border border-border-gray focus:outline-none hover:bg-border-gray">
+                        Dessert
+                    </button>
+                    <button class="flex-shrink-0 bg-light-gray-bg text-dark-gray text-sm px-4 py-2 rounded-lg font-medium border border-border-gray focus:outline-none hover:bg-border-gray">
+                        Appetizer
+                    </button>
+                    </div>
+            </section>
+
+            <section class="flex-grow p-4 bg-white-box grid grid-cols-2 gap-4 auto-rows-min">
+                <div class="col-span-1 placeholder-box h-48 text-base">
+                    Product
+                </div>
+                <div class="col-span-1 placeholder-box h-24 text-base">
+                    Product
+                </div>
+                <div class="col-span-1 placeholder-box h-24 text-base">
+                    Product
+                </div>
+                <div class="col-span-1 placeholder-box h-48 text-base">
+                    Product
+                </div>
+                <div class="col-span-1 placeholder-box h-24 text-base">
+                    Product
+                </div>
+                <div class="col-span-1 placeholder-box h-24 text-base">
+                    Product
+                </div>
+            </section>
+
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Submitted</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top to mimic mobile screen */
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .mobile-frame {
+            width: 375px; /* Standard mobile width */
+            height: 667px; /* Standard mobile height */
+            border: 8px solid #333;
+            border-radius: 36px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0 0 0; /* Space for the header */
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 50px; /* Space below the back arrow */
+        }
+
+        .back-arrow {
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to the top within its flex container */
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .check-circle {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .check-mark {
+            font-size: 36px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .order-text {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .divider {
+            width: 80%;
+            height: 1px;
+            background-color: #ccc;
+            margin-bottom: 40px;
+        }
+
+        .view-order-button {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-frame">
+        <div class="header">
+            <a href="#" class="back-arrow">&leftarrow;</a>
+        </div>
+        <div class="content">
+            <div class="check-circle">
+                <span class="check-mark">&#10003;</span>
+            </div>
+            <div class="order-text">
+                Order submitted
+            </div>
+            <div class="divider"></div>
+            <a href="#" class="view-order-button">View order</a>
+        </div>
+    </div>
+</body>
+</html>
