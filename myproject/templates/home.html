@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,65 +114,65 @@
         // Master list of products with their categories and details
         const allProducts = [
             // Best Sellers / Dessert (Uses uploaded file)
-            { id: 'P1', name: "Sweet Banana Treat", price: 250.00, 
-              imageUrl: "uploaded:minatamis-na-saba-philippine-bananas-in-syrup.jpg-2b6de75a-a422-4ed6-94b4-43927b7a846f", 
+            { id: 'P1', name: "Sweet Banana Treat", price: 250.00,
+              imageUrl: "/myproject/website.image/SBanana.jpg",
               category: 'Dessert', description: "A delicious, creamy dessert with fresh banana, caramel, and vanilla ice cream." },
             
             // Best Sellers / Main Course (Themed Placeholder)
             { id: 'P2', name: "Savory Steak", price: 499.50, 
-              imageUrl: "https://placehold.co/150x120/a34438/ffffff?text=🥩+Steak", 
+              imageUrl: "/myproject/website.image/steak.webp", 
               category: 'Main Course', description: "Grilled USDA choice cut steak, served with asparagus and roasted garlic potatoes." },
             
             // Main Course (Themed Placeholders)
             { id: 'P3', name: "Spicy Noodle Soup", price: 180.00, 
-              imageUrl: "https://placehold.co/150x120/dd782e/ffffff?text=🍜+Noodles", 
+              imageUrl: "/myproject/website.image/Soap.webp", 
               category: 'Main Course', description: "Rich, fiery broth filled with hand-pulled noodles, pork, and bok choy." },
             { id: 'P7', name: "Grilled Fish Fillet", price: 320.00, 
-              imageUrl: "https://placehold.co/150x120/007f9c/ffffff?text=🐟+Grilled+Fish", 
+              imageUrl: "/myproject/website.image/fish-fillet.jpg", 
               category: 'Main Course', description: "Lemon-herb grilled snapper fillet, light and healthy, served with rice pilaf." },
             
             // Appetizer (Themed Placeholders)
             { id: 'P4', name: "Fresh Garden Salad", price: 120.00, 
-              imageUrl: "https://placehold.co/150x120/4a7f45/ffffff?text=🥗+Salad", 
+              imageUrl: "/myproject/website.image/Fresh-Salad.webp", 
               category: 'Appetizer', description: "Crisp mixed greens, tomatoes, cucumbers, and a light vinaigrette dressing." },
             { id: 'P9', name: "Mozzarella Sticks", price: 150.00, 
-              imageUrl: "https://placehold.co/150x120/f9d747/000000?text=🧀+Sticks", 
+              imageUrl: "/myproject/website.image/Mozzarella-cheese.webp", 
               category: 'Appetizer', description: "Golden fried mozzarella with a side of zesty marinara sauce." },
             { id: 'P10', name: "Buffalo Chicken Wings", price: 175.00, 
-              imageUrl: "https://placehold.co/150x120/cc3000/ffffff?text=🍗+Wings", 
+              imageUrl: "/myproject/website.image/buffalo-wings.jpg", 
               category: 'Appetizer', description: "Tangy and spicy chicken wings, perfect for sharing (or not!)." },
             
             // Beverage (Themed Placeholders)
             { id: 'P5', name: "Iced Caramel Coffee", price: 100.00, 
-              imageUrl: "https://placehold.co/150x120/7e573e/ffffff?text=☕+Iced+Coffee", 
+              imageUrl: "/myproject/website.image/caramel.jpg", 
               category: 'Beverage', description: "A chilled coffee beverage layered with sweet caramel syrup." },
             { id: 'P8', name: "Tropical Mango Smoothie", price: 135.00, 
-              imageUrl: "https://placehold.co/150x120/ffb800/ffffff?text=🥭+Smoothie", 
+              imageUrl: "/myproject/website.image/mango.jpg", 
               category: 'Beverage', description: "Blended fresh mango, yogurt, and a splash of coconut milk. Refreshing!" },
             { id: 'P11', name: "Green Tea Frappe", price: 110.00, 
-              imageUrl: "https://placehold.co/150x120/86c166/ffffff?text=🍵+Matcha", 
+              imageUrl: "/myproject/website.image/green_tea.jpg", 
               category: 'Beverage', description: "Cool, icy blend of matcha green tea and cream." },
 
             // Dessert (Themed Placeholders)
             { id: 'P6', name: "Chocolate Lava Cake", price: 180.00, 
-              imageUrl: "https://placehold.co/150x120/5e3518/ffffff?text=🍫+Lava+Cake", 
+              imageUrl: "/myproject/website.image/chocolate_lava_cake.jpg", 
               category: 'Dessert', description: "Warm, molten chocolate cake with a soft, gooey center. A classic favorite." },
             { id: 'P12', name: "Classic Cheesecake Bite", price: 90.00, 
-              imageUrl: "https://placehold.co/150x120/f8f4e3/333333?text=🍰+Cheesecake", 
+              imageUrl: "/myproject/website.image/classic_cheese_bites.jpg", 
               category: 'Dessert', description: "Rich and creamy New York-style cheesecake, individually portioned." },
             
             // Filipino Items (Themed Placeholders)
             { id: 'P13', name: "Chicken Adobo", price: 210.00, 
-              imageUrl: "https://placehold.co/150x120/6b7280/ffffff?text=🐔+Adobo", 
+              imageUrl: "/myproject/website.image/adobo.jpg", 
               category: 'Main Course', description: "Classic Filipino dish, marinated in soy sauce, vinegar, and garlic." },
             { id: 'P14', name: "Pancit Canton", price: 155.00, 
-              imageUrl: "https://placehold.co/150x120/e8c283/333333?text=🥢+Pancit", 
+              imageUrl: "/myproject/website.image/pancitcanton.jpg", 
               category: 'Main Course', description: "Stir-fried noodles with mixed vegetables and choice of meat." },
             { id: 'P15', name: "Leche Flan", price: 85.00, 
-              imageUrl: "https://placehold.co/150x120/f9a825/333333?text=🍮+Flan", 
+              imageUrl: "/myproject/website.image/leche_flan.jpg", 
               category: 'Dessert', description: "A creamy custard dessert with a soft caramel layer." },
             { id: 'P16', name: "Spring Rolls", price: 95.00, 
-              imageUrl: "https://placehold.co/150x120/c23616/ffffff?text=🍤+Rolls", 
+              imageUrl: "/myproject/website.image/Spring_roll.jpg", 
               category: 'Appetizer', description: "Crispy fried rolls filled with vegetables, served with sweet chili sauce." },
         ];
 
